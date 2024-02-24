@@ -2,6 +2,7 @@ const express = require("express");
 require("dotenv").config();
 const mongoose = require("mongoose");
 // const { Commit } = require("./models/commit.model");
+
 mongoose
   .connect(process.env.MONGO)
   .then(() => {
@@ -35,9 +36,6 @@ app.post("/commits", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.listen(3000, () => {
-  console.log("server is running on port 3000");
-});
 
 //GET
 
@@ -67,4 +65,27 @@ app.delete("/commits/:id", async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: error.message });
   }
+});
+
+//Update
+
+app.put("/commits/:id", async (req, res) => {
+  try {
+    const { message } = req.body;
+    const updatedCommit = await Commit.findByIdAndUpdate(
+      req.params.id,
+      { message },
+      { new: true }
+    );
+    if (!updatedCommit) {
+      return res.status(404).json({ error: "Commit not found" });
+    }
+    return updatedCommit;
+  } catch (err) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.listen(3000, () => {
+  console.log("server is running on port 3000");
 });
