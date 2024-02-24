@@ -38,3 +38,33 @@ app.post("/commits", async (req, res) => {
 app.listen(3000, () => {
   console.log("server is running on port 3000");
 });
+
+//GET
+
+app.get("/commits", async (req, res) => {
+  try {
+    const { startTime, endTime, author, repo } = req.query;
+    const query = {
+      timestamps: { $gte: new Date(startTime), $lte: new Date(endTime) },
+      author,
+      repo,
+    };
+    const commits = await Commit.find(query);
+    res.json(commits);
+  } catch (err) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+//DELETE
+app.delete("/commits/:id", async (req, res) => {
+  try {
+    const deletedCommit = await Commit.findByIdAndDelete(req.params.id);
+    if (!deletedCommit) {
+      return res.status(404).json({ error: "Commit not found" });
+    }
+    res.json(deletedCommit);
+  } catch (err) {
+    res.status(500).json({ error: error.message });
+  }
+});
