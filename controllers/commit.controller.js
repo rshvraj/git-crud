@@ -1,32 +1,7 @@
-const express = require("express");
-require("dotenv").config();
-const mongoose = require("mongoose");
-const Commit = require("./models/commit.model");
-
-mongoose
-  .connect(process.env.MONGO)
-  .then(() => {
-    console.log("Connected to Db");
-  })
-  .catch((err) => {
-    console.log(err);
-  });
-
-const app = express();
-app.use(express.json());
-
-// const commitSchema = new mongoose.Schema({
-//   message: { type: String, required: true },
-//   author: { type: String, required: true },
-//   timestamps: { type: Date, default: Date.now },
-//   repo: { type: String, required: true },
-//   commitID: { type: String, required: true, unique: true },
-// });
-
-// const Commit = mongoose.model("Commit", commitSchema);
+const Commit = require("../models/commit.model");
 
 // POST
-app.post("/commits", async (req, res) => {
+const write = async (req, res) => {
   try {
     const { message, author, repo, commitID } = req.body;
     const commit = new Commit({ message, author, repo, commitID });
@@ -35,7 +10,7 @@ app.post("/commits", async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
+};
 
 //GET
 
@@ -49,7 +24,7 @@ app.get("/commits", async (req, res) => {
     };
     const commits = await Commit.find(query);
     res.json(commits);
-  } catch (error) {
+  } catch (err) {
     res.status(500).json({ error: error.message });
   }
 });
@@ -61,8 +36,8 @@ app.delete("/commits/:id", async (req, res) => {
     if (!deletedCommit) {
       return res.status(404).json({ error: "Commit not found" });
     }
-    res.json(deletedCommit).statusMessage("Deleted ");
-  } catch (error) {
+    res.json(deletedCommit);
+  } catch (err) {
     res.status(500).json({ error: error.message });
   }
 });
@@ -81,11 +56,9 @@ app.put("/commits/:id", async (req, res) => {
       return res.status(404).json({ error: "Commit not found" });
     }
     return updatedCommit;
-  } catch (error) {
+  } catch (err) {
     res.status(500).json({ error: error.message });
   }
 });
 
-app.listen(3000, () => {
-  console.log("server is running on port 3000");
-});
+module.exports = { write };
